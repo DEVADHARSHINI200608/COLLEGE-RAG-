@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, Request, status
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -25,6 +25,8 @@ router = APIRouter(prefix="/documents", tags=["documents"])
 
 
 class SourceResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     source_name: str
     source_type: str
@@ -36,9 +38,6 @@ class SourceResponse(BaseModel):
     file_size_bytes: Optional[int]
     department: Optional[str]
     created_at: str
-
-    class Config:
-        from_attributes = True
 
 
 @router.post("/upload", status_code=status.HTTP_201_CREATED)

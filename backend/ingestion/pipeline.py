@@ -12,7 +12,7 @@ from typing import List, Optional, Tuple
 
 import structlog
 from langchain_core.documents import Document
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from config import settings
 from retrieval.vector_store import add_documents

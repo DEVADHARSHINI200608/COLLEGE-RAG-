@@ -8,11 +8,9 @@ import os
 from typing import Dict, List, Optional, Any
 
 import structlog
-from langchain_community.vectorstores import Chroma
 from langchain_core.documents import Document
 
 from config import settings
-from models.embeddings import embedding_model
 
 logger = structlog.get_logger(__name__)
 
@@ -23,7 +21,10 @@ COLLECTIONS = {
 }
 
 
-def _get_chroma(collection_name: str) -> Chroma:
+def _get_chroma(collection_name: str):
+    """Lazy import so tests can run without chromadb installed."""
+    from langchain_community.vectorstores import Chroma
+    from models.embeddings import embedding_model
     os.makedirs(settings.CHROMA_PERSIST_DIR, exist_ok=True)
     return Chroma(
         collection_name=collection_name,

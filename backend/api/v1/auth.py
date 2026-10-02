@@ -5,9 +5,9 @@ from __future__ import annotations
 
 from datetime import timedelta
 
+import bcrypt as _bcrypt
 from fastapi import APIRouter, Depends, HTTPException, Response, Request, status
 from pydantic import BaseModel, EmailStr
-from passlib.context import CryptContext
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -19,7 +19,6 @@ from security.audit import log_event
 from config import settings
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 # ─── Schemas ────────────────────────────────────────────────────────────
@@ -55,11 +54,14 @@ class UserResponse(BaseModel):
 
 # ─── Helpers ────────────────────────────────────────────────────────────
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    # bcrypt requires ≤72 bytes; truncate safely
+    pw_bytes = password.encode("utf-8")[:72]
+    return _bcrypt.hashpw(pw_bytes, _bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    pw_bytes = plain.encode("utf-8")[:72]
+    return _bcrypt.checkpw(pw_bytes, hashed.encode("utf-8"))
 
 
 # ─── Routes ─────────────────────────────────────────────────────────────
